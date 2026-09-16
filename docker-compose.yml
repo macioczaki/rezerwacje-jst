@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16
+    container_name: rezerwacje-db
+    environment:
+      POSTGRES_USER: rezerwacje
+      POSTGRES_PASSWORD: rezerwacje
+      POSTGRES_DB: rezerwacje
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rezerwacje"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer
+    container_name: rezerwacje-adminer
+    ports:
+      - "8081:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
