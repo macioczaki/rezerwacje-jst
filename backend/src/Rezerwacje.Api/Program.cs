@@ -1,5 +1,6 @@
 using Microsoft.OpenApi.Models;
 using Rezerwacje.Api.Extensions;
+using Rezerwacje.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,5 +52,22 @@ if (!app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    var db = services.GetRequiredService<AppDbContext>();
+
+    try
+    {
+        await DbSeeder.SeedAsync(db, logger);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Błąd podczas seedowania bazy danych.");
+        throw;
+    }
+}
 
 app.Run();
