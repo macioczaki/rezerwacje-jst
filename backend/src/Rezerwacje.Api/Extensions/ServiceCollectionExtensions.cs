@@ -7,6 +7,8 @@ using Rezerwacje.Application.Rooms;
 using Rezerwacje.Infrastructure.Auth;
 using Rezerwacje.Infrastructure.Persistence;
 using Rezerwacje.Infrastructure.Rooms;
+using Rezerwacje.Application.Reservations;
+using Rezerwacje.Infrastructure.Reservations;
 
 namespace Rezerwacje.Api.Extensions;
 
@@ -22,6 +24,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IRoomService, RoomService>();
+        services.AddScoped<IReservationService, ReservationService>();
 
         return services;
     }
