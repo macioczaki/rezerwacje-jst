@@ -35,6 +35,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddJwtAuth(builder.Configuration);
+builder.Services.AddCorsPolicy();
 
 var app = builder.Build();
 
@@ -49,6 +50,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
+app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
