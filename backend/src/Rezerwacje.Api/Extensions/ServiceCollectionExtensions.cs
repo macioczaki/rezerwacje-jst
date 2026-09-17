@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Rezerwacje.Application.Auth;
+using Rezerwacje.Application.Rooms;
 using Rezerwacje.Infrastructure.Auth;
 using Rezerwacje.Infrastructure.Persistence;
+using Rezerwacje.Infrastructure.Rooms;
 
 namespace Rezerwacje.Api.Extensions;
 
@@ -19,6 +21,7 @@ public static class ServiceCollectionExtensions
             options.UseNpgsql(connectionString));
 
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IRoomService, RoomService>();
 
         return services;
     }
