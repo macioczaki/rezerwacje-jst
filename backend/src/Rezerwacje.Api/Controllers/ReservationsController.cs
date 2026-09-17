@@ -30,7 +30,7 @@ public class ReservationsController : ControllerBase
         // Jeśli użytkownik nie jest adminem, może filtrować tylko po sobie.
         var currentUserId = GetCurrentUserId();
         if (!IsAdmin() && userId.HasValue && userId.Value != currentUserId)
-            return Forbid();
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Możesz filtrować tylko własne rezerwacje." });
 
         var result = await _reservations.GetAllAsync(roomId, userId, from, to, onlyActive, ct);
         return Ok(result);
@@ -44,7 +44,7 @@ public class ReservationsController : ControllerBase
             var reservation = await _reservations.GetByIdAsync(id, ct);
 
             if (!IsAdmin() && reservation.UserId != GetCurrentUserId())
-                return Forbid();
+                return StatusCode(StatusCodes.Status403Forbidden, new { error = "Możesz przeglądać tylko własne rezerwacje." });
 
             return Ok(reservation);
         }
@@ -93,7 +93,7 @@ public class ReservationsController : ControllerBase
         }
         catch (UnauthorizedAccessException ex)
         {
-            return Forbid(ex.Message);
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
@@ -115,7 +115,7 @@ public class ReservationsController : ControllerBase
         }
         catch (UnauthorizedAccessException ex)
         {
-            return Forbid(ex.Message);
+            return StatusCode(StatusCodes.Status403Forbidden, new { error = ex.Message });
         }
         catch (InvalidOperationException ex)
         {

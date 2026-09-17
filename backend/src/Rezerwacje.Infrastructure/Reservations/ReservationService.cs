@@ -146,7 +146,7 @@ public class ReservationService : IReservationService
             throw new KeyNotFoundException("Sala nie istnieje.");
 
         // Dzień w UTC: [00:00, 24:00)
-        var dayStart = date.Date;
+        var dayStart = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
         var dayEnd = dayStart.AddDays(1);
 
         var busy = await _db.Reservations
