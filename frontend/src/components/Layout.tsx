@@ -33,6 +33,9 @@ export function Layout() {
               <NavLink to="/reservations" className={navLinkClass}>
                 Rezerwacje
               </NavLink>
+              <NavLink to="/availability" className={navLinkClass}>
+                Dostępność
+              </NavLink>
               {isAdmin && (
                 <NavLink to="/admin/rooms" className={navLinkClass}>
                   Panel admina

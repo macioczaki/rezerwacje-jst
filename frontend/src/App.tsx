@@ -6,6 +6,7 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { RoomsPage } from "./pages/RoomsPage";
 import { ReservationsPage } from "./pages/ReservationsPage";
 import { AdminRoomsPage } from "./pages/AdminRoomsPage";
+import { AvailabilityPage } from "./pages/AvailabilityPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -54,6 +55,7 @@ function App() {
       >
         <Route path="/" element={<RoomsPage />} />
         <Route path="/reservations" element={<ReservationsPage />} />
+        <Route path="/availability" element={<AvailabilityPage />} />
         <Route
           path="/admin/rooms"
           element={
