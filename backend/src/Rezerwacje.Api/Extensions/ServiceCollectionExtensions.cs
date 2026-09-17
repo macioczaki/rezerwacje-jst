@@ -58,18 +58,27 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddCorsPolicy(this IServiceCollection services)
+    public static IServiceCollection AddCorsPolicy(this IServiceCollection services, IConfiguration config)
     {
+        var extraOrigins = config["Cors:AllowedOrigins"]?
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            ?? Array.Empty<string>();
+
+        var allowedOrigins = new[]
+        {
+            "http://localhost:5173",
+            "http://localhost:4173",
+            "http://localhost:3000"
+        }
+        .Concat(extraOrigins)
+        .ToArray();
+
         services.AddCors(options =>
         {
             options.AddPolicy("Frontend", policy =>
             {
                 policy
-                    .WithOrigins(
-                        "http://localhost:5173",
-                        "http://localhost:4173",
-                        "http://localhost:3000"
-                    )
+                    .WithOrigins(allowedOrigins)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();
