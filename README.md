@@ -140,6 +140,7 @@ W budowie:
 
 - [x] Backend: auth, sale, rezerwacje, kolizje
 - [x] Testy jednostkowe + CI
+- [x] Refresh tokeny z auto-refresh
 - [ ] Frontend React
 - [ ] Deploy
 

@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<Room> Rooms => Set<Room>();
     public DbSet<Reservation> Reservations => Set<Reservation>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -50,6 +51,18 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
             e.HasIndex(x => x.TokenHash);
             e.HasIndex(x => new { x.UserId, x.ExpiresAt });
+        });
+
+        modelBuilder.Entity<AuditLog>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.EntityType).HasMaxLength(100).IsRequired();
+            e.Property(x => x.UserEmail).HasMaxLength(256);
+            e.Property(x => x.Changes).IsRequired();
+            // Indeksy pod typowe zapytania: "pokaż ostatnie zmiany", "pokaż zmiany sali X".
+            e.HasIndex(x => x.Timestamp);
+            e.HasIndex(x => new { x.EntityType, x.EntityId });
+            e.HasIndex(x => x.UserId);
         });
 
         base.OnModelCreating(modelBuilder);
