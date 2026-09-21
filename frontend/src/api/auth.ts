@@ -1,5 +1,12 @@
 import { api } from "./client";
-import type { AuthResponse, LoginRequest, RefreshTokenRequest, RegisterRequest } from "../types";
+import type {
+  AuthResponse,
+  ForgotPasswordRequest,
+  LoginRequest,
+  RefreshTokenRequest,
+  RegisterRequest,
+  ResetPasswordRequest,
+} from "../types";
 
 export const authApi = {
   login: async (data: LoginRequest): Promise<AuthResponse> => {
@@ -19,5 +26,13 @@ export const authApi = {
 
   logout: async (data: RefreshTokenRequest): Promise<void> => {
     await api.post("/api/Auth/logout", data);
+  },
+
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<void> => {
+    await api.post("/api/Auth/forgot-password", data);
+  },
+
+  resetPassword: async (data: ResetPasswordRequest): Promise<void> => {
+    await api.post("/api/Auth/reset-password", data);
   },
 };

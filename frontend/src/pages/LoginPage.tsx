@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
@@ -7,6 +7,8 @@ import { Input } from "../components/Input";
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const resetSuccess = searchParams.get("reset") === "success";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,11 @@ export function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-md p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Zaloguj się</h1>
-
+        {resetSuccess && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-800 text-sm rounded">
+            Hasło zostało zmienione. Możesz się zalogować.
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <Input
             label="Email"
@@ -64,12 +70,22 @@ export function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-sm text-gray-600 text-center">
-          Nie masz konta?{" "}
-          <Link to="/register" className="text-blue-600 hover:underline font-medium">
-            Zarejestruj się
-          </Link>
-        </p>
+        <div className="mt-6 space-y-2 text-sm text-gray-600 text-center">
+          <p>
+            <Link
+              to="/forgot-password"
+              className="text-blue-600 hover:underline font-medium"
+            >
+              Nie pamiętam hasła
+            </Link>
+          </p>
+          <p>
+            Nie masz konta?{" "}
+            <Link to="/register" className="text-blue-600 hover:underline font-medium">
+              Zarejestruj się
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

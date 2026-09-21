@@ -8,6 +8,8 @@ import { ReservationsPage } from "./pages/ReservationsPage";
 import { AvailabilityPage } from "./pages/AvailabilityPage";
 import { AdminRoomsPage } from "./pages/AdminRoomsPage";
 import { AuditLogPage } from "./pages/AuditLogPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -30,6 +32,22 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <Routes>
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicOnlyRoute>
+            <ForgotPasswordPage />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/reset-password"
+        element={
+          <PublicOnlyRoute>
+            <ResetPasswordPage />
+          </PublicOnlyRoute>
+        }
+      />
       <Route
         path="/login"
         element={
