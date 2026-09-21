@@ -13,6 +13,7 @@ using Rezerwacje.Application.Common;
 using Rezerwacje.Api.Services;
 using Rezerwacje.Application.Audit;
 using Rezerwacje.Infrastructure.Audit;
+using Rezerwacje.Infrastructure.Email;
 
 namespace Rezerwacje.Api.Extensions;
 
@@ -37,6 +38,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRoomService, RoomService>();
         services.AddScoped<IReservationService, ReservationService>();
         services.AddScoped<IAuditLogService, AuditLogService>();
+        services.Configure<SmtpOptions>(config.GetSection("Smtp"));
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
 
         return services;
     }
