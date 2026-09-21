@@ -13,9 +13,9 @@ export function Layout() {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
+  const handleLogout = async () => {
+  await logout();
+  navigate("/login");
   };
 
   return (

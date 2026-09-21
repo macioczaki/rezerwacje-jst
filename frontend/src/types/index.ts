@@ -2,9 +2,15 @@ export type UserRole = "Employee" | "Admin";
 
 export interface AuthResponse {
   accessToken: string;
-  expiresAt: string;
+  accessTokenExpiresAt: string;
+  refreshToken: string;
+  refreshTokenExpiresAt: string;
   email: string;
   role: UserRole;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
 }
 
 export interface LoginRequest {

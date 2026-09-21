@@ -15,13 +15,14 @@ interface AuthContextValue {
   isAdmin: boolean;
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const TOKEN_KEY = "accessToken";
-const USER_KEY = "user";
+export const TOKEN_KEY = "accessToken";
+export const REFRESH_TOKEN_KEY = "refreshToken";
+export const USER_KEY = "user";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => {
@@ -38,9 +39,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const authUser: AuthUser = {
       email: response.email,
       role: response.role,
-      expiresAt: response.expiresAt,
+      expiresAt: response.accessTokenExpiresAt,
     };
     localStorage.setItem(TOKEN_KEY, response.accessToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
     localStorage.setItem(USER_KEY, JSON.stringify(authUser));
     setUser(authUser);
   };
@@ -55,13 +57,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     applyAuth(response);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    if (refreshToken) {
+      try {
+        await authApi.logout({ refreshToken });
+      } catch {
+        // ignorujemy błędy — i tak czyścimy lokalny stan
+      }
+    }
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     setUser(null);
   };
 
-  // Nasłuchuj na zmiany localStorage z innych kart przeglądarki
   useEffect(() => {
     const handler = (e: StorageEvent) => {
       if (e.key === USER_KEY) {
