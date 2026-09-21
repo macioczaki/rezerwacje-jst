@@ -11,6 +11,8 @@ using Rezerwacje.Infrastructure.Reservations;
 using Rezerwacje.Infrastructure.Rooms;
 using Rezerwacje.Application.Common;
 using Rezerwacje.Api.Services;
+using Rezerwacje.Application.Audit;
+using Rezerwacje.Infrastructure.Audit;
 
 namespace Rezerwacje.Api.Extensions;
 
@@ -34,6 +36,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IRoomService, RoomService>();
         services.AddScoped<IReservationService, ReservationService>();
+        services.AddScoped<IAuditLogService, AuditLogService>();
 
         return services;
     }
