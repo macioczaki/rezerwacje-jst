@@ -39,7 +39,17 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IReservationService, ReservationService>();
         services.AddScoped<IAuditLogService, AuditLogService>();
         services.Configure<SmtpOptions>(config.GetSection("Smtp"));
-        services.AddScoped<IEmailSender, SmtpEmailSender>();
+        services.Configure<BrevoOptions>(config.GetSection("Brevo"));
+
+        var emailProvider = config["Email:Provider"] ?? "Smtp";
+        if (string.Equals(emailProvider, "Brevo", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddHttpClient<IEmailSender, BrevoApiEmailSender>();
+        }
+        else
+        {
+            services.AddScoped<IEmailSender, SmtpEmailSender>();
+        }
 
         return services;
     }
