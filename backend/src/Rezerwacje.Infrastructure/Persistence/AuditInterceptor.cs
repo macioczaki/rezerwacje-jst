@@ -41,6 +41,7 @@ public class AuditInterceptor : SaveChangesInterceptor
             .Where(e =>
                 e.Entity is not AuditLog
                 && e.Entity is not RefreshToken
+                && e.Entity is not PasswordResetToken
                 && (e.State == EntityState.Added
                     || e.State == EntityState.Modified
                     || e.State == EntityState.Deleted))

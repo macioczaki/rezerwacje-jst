@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<Reservation> Reservations => Set<Reservation>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -63,6 +64,18 @@ public class AppDbContext : DbContext
             e.HasIndex(x => x.Timestamp);
             e.HasIndex(x => new { x.EntityType, x.EntityId });
             e.HasIndex(x => x.UserId);
+        });
+
+        modelBuilder.Entity<PasswordResetToken>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.TokenHash).HasMaxLength(200).IsRequired();
+            e.HasOne(x => x.User)
+                .WithMany(u => u.PasswordResetTokens)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(x => x.TokenHash);
+            e.HasIndex(x => new { x.UserId, x.ExpiresAt });
         });
 
         base.OnModelCreating(modelBuilder);
