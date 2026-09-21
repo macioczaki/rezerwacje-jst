@@ -1,8 +1,8 @@
 # Rezerwacje JST
 
-[![backend](https://github.com/macioczakii/rezerwacje-jst/actions/workflows/backend.yml/badge.svg)](https://github.com/macioczakii/rezerwacje-jst/actions/workflows/backend.yml)
-[![frontend](https://github.com/macioczakii/rezerwacje-jst/actions/workflows/frontend.yml/badge.svg)](https://github.com/macioczakii/rezerwacje-jst/actions/workflows/frontend.yml)
-[![e2e](https://github.com/macioczakii/rezerwacje-jst/actions/workflows/e2e.yml/badge.svg)](https://github.com/macioczakii/rezerwacje-jst/actions/workflows/e2e.yml)
+[![backend](https://github.com/macioczaki/rezerwacje-jst/actions/workflows/backend.yml/badge.svg)](https://github.com/macioczaki/rezerwacje-jst/actions/workflows/backend.yml)
+[![frontend](https://github.com/macioczaki/rezerwacje-jst/actions/workflows/frontend.yml/badge.svg)](https://github.com/macioczaki/rezerwacje-jst/actions/workflows/frontend.yml)
+[![e2e](https://github.com/macioczaki/rezerwacje-jst/actions/workflows/e2e.yml/badge.svg)](https://github.com/macioczaki/rezerwacje-jst/actions/workflows/e2e.yml)
 
 > **Demo online:** https://rezerwacje-jst.vercel.app
 > **API (Swagger):** https://rezerwacje-jst.onrender.com/swagger
@@ -125,7 +125,7 @@ Zależności płyną jednokierunkowo: `Api → Infrastructure → Application �
 1. Sklonuj repo i wejdź do katalogu:
 
 ```
-git clone https://github.com/macioczakii/rezerwacje-jst.git
+git clone https://github.com/macioczaki/rezerwacje-jst.git
 cd rezerwacje-jst
 ```
 
