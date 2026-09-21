@@ -9,6 +9,8 @@ using Rezerwacje.Infrastructure.Auth;
 using Rezerwacje.Infrastructure.Persistence;
 using Rezerwacje.Infrastructure.Reservations;
 using Rezerwacje.Infrastructure.Rooms;
+using Rezerwacje.Application.Common;
+using Rezerwacje.Api.Services;
 
 namespace Rezerwacje.Api.Extensions;
 
@@ -16,11 +18,18 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
-        var connectionString = config.GetConnectionString("Default")
-            ?? throw new InvalidOperationException("Connection string 'Default' not found.");
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<AuditInterceptor>();
 
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(connectionString));
+        services.AddDbContext<AppDbContext>((sp, options) =>
+        {
+            var connectionString = config.GetConnectionString("Default")
+                ?? throw new InvalidOperationException("Connection string 'Default' not found.");
+
+            options.UseNpgsql(connectionString);
+            options.AddInterceptors(sp.GetRequiredService<AuditInterceptor>());
+        });
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IRoomService, RoomService>();
