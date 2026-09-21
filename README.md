@@ -50,6 +50,8 @@ Zależności płyną jednokierunkowo: `Api → Infrastructure → Application �
 - **JWT z claimami roli** — autoryzacja bezstanowa, łatwy deploy.
 - **Soft delete** — anulowana rezerwacja nie znika, tylko zmienia status, żeby historia była spójna.
 - **Seed data w Development** — po pierwszym uruchomieniu baza ma przykładowe dane.
+- **Refresh tokeny z rotacją i wykrywaniem reuse** — access token żyje 15 min, refresh token 7 dni. Każdy refresh unieważnia stary token i tworzy nowy. Próba ponownego użycia starego tokenu unieważnia wszystkie aktywne sesje użytkownika (obrona przed kradzieżą).
+- **Auto-refresh w Axios** — gdy access token wygaśnie, frontend automatycznie odświeża go i powtarza żądanie. Użytkownik nie zauważa. Równoległe żądania czekają na ten sam refresh (kolejkowanie).
 
 ## Uruchomienie lokalne
 
