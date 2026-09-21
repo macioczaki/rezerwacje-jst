@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Rezerwacje.Application.Auth.Dtos;
 using Rezerwacje.Infrastructure.Auth;
 using Rezerwacje.Infrastructure.Persistence;
+using Rezerwacje.Application.Common;
 using Xunit;
 
 namespace Rezerwacje.UnitTests.Auth;
@@ -28,13 +29,17 @@ public class AuthServiceTests
             })
             .Build();
     }
+    private static AuthService CreateService(AppDbContext db, IEmailSender? emailSender = null)
+    {
+        return new AuthService(db, CreateConfig(), emailSender ?? new FakeEmailSender());
+    }
 
     [Fact]
     public async Task RegisterAsync_ValidRequest_CreatesUserAndReturnsToken()
     {
         // Arrange
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
         var request = new RegisterRequest("jan@example.com", "Haslo123!", "Jan", "Kowalski");
 
         // Act
@@ -56,7 +61,7 @@ public class AuthServiceTests
     public async Task RegisterAsync_DuplicateEmail_Throws()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
         var request = new RegisterRequest("dup@example.com", "Haslo123!", "Jan", "Kowalski");
 
         await service.RegisterAsync(request);
@@ -71,7 +76,7 @@ public class AuthServiceTests
     public async Task RegisterAsync_EmailIsNormalizedToLowercase()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
         var request = new RegisterRequest("JAN@EXAMPLE.COM", "Haslo123!", "Jan", "Kowalski");
 
         var response = await service.RegisterAsync(request);
@@ -83,7 +88,7 @@ public class AuthServiceTests
     public async Task LoginAsync_ValidCredentials_ReturnsToken()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
 
         await service.RegisterAsync(
             new RegisterRequest("login@example.com", "Haslo123!", "Jan", "Kowalski"));
@@ -100,7 +105,7 @@ public class AuthServiceTests
     public async Task LoginAsync_WrongPassword_Throws()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
 
         await service.RegisterAsync(
             new RegisterRequest("wp@example.com", "Haslo123!", "Jan", "Kowalski"));
@@ -115,7 +120,7 @@ public class AuthServiceTests
     public async Task LoginAsync_UnknownEmail_Throws()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(
             () => service.LoginAsync(new LoginRequest("nie.ma@example.com", "Haslo123!")));
@@ -127,7 +132,7 @@ public class AuthServiceTests
     public async Task LoginAsync_InactiveUser_Throws()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
 
         await service.RegisterAsync(
             new RegisterRequest("inactive@example.com", "Haslo123!", "Jan", "Kowalski"));
@@ -145,7 +150,7 @@ public class AuthServiceTests
     public async Task LoginAsync_ReturnsRefreshToken()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
         await service.RegisterAsync(
             new RegisterRequest("rt@example.com", "Haslo123!", "Jan", "Kowalski"));
 
@@ -162,7 +167,7 @@ public class AuthServiceTests
     public async Task RegisterAsync_CreatesRefreshToken()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
 
         var response = await service.RegisterAsync(
             new RegisterRequest("rt2@example.com", "Haslo123!", "Jan", "Kowalski"));
@@ -178,7 +183,7 @@ public class AuthServiceTests
     public async Task RefreshAsync_ValidToken_ReturnsNewTokens()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
         var registered = await service.RegisterAsync(
             new RegisterRequest("refresh@example.com", "Haslo123!", "Jan", "Kowalski"));
 
@@ -194,7 +199,7 @@ public class AuthServiceTests
     public async Task RefreshAsync_ValidToken_RevokesOldToken()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
         var registered = await service.RegisterAsync(
             new RegisterRequest("revoke@example.com", "Haslo123!", "Jan", "Kowalski"));
 
@@ -210,7 +215,7 @@ public class AuthServiceTests
     public async Task RefreshAsync_ReusedToken_ThrowsAndRevokesAll()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
         var registered = await service.RegisterAsync(
             new RegisterRequest("reuse@example.com", "Haslo123!", "Jan", "Kowalski"));
 
@@ -234,7 +239,7 @@ public class AuthServiceTests
     public async Task RefreshAsync_UnknownToken_Throws()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(
             () => service.RefreshAsync("nie-istnieje"));
@@ -246,7 +251,7 @@ public class AuthServiceTests
     public async Task RefreshAsync_ExpiredToken_Throws()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
         var registered = await service.RegisterAsync(
             new RegisterRequest("expired@example.com", "Haslo123!", "Jan", "Kowalski"));
 
@@ -265,7 +270,7 @@ public class AuthServiceTests
     public async Task RefreshAsync_EmptyToken_Throws()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
 
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => service.RefreshAsync(""));
@@ -275,7 +280,7 @@ public class AuthServiceTests
     public async Task LogoutAsync_ValidToken_RevokesToken()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
         var registered = await service.RegisterAsync(
             new RegisterRequest("logout@example.com", "Haslo123!", "Jan", "Kowalski"));
 
@@ -289,7 +294,7 @@ public class AuthServiceTests
     public async Task LogoutAsync_UnknownToken_DoesNotThrow()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
 
         // Idempotentne — brak błędu gdy token nie istnieje
         await service.LogoutAsync("nie-istnieje");
@@ -299,7 +304,7 @@ public class AuthServiceTests
     public async Task LogoutAsync_RevokedToken_DoesNotThrow()
     {
         using var db = CreateDb();
-        var service = new AuthService(db, CreateConfig());
+        var service = CreateService(db);
         var registered = await service.RegisterAsync(
             new RegisterRequest("logout2@example.com", "Haslo123!", "Jan", "Kowalski"));
 

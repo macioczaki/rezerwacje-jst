@@ -9,6 +9,8 @@ using Rezerwacje.Application.Auth;
 using Rezerwacje.Application.Auth.Dtos;
 using Rezerwacje.Domain.Entities;
 using Rezerwacje.Infrastructure.Persistence;
+using Rezerwacje.Application.Common;
+using Rezerwacje.Infrastructure.Email;
 
 namespace Rezerwacje.Infrastructure.Auth;
 
@@ -16,12 +18,14 @@ public class AuthService : IAuthService
 {
     private readonly AppDbContext _db;
     private readonly IConfiguration _config;
+    private readonly IEmailSender _email;
 
-    public AuthService(AppDbContext db, IConfiguration config)
-    {
-        _db = db;
-        _config = config;
-    }
+    public AuthService(AppDbContext db, IConfiguration config, IEmailSender email)
+{
+    _db = db;
+    _config = config;
+    _email = email;
+}
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
     {
@@ -109,6 +113,83 @@ public class AuthService : IAuthService
             return;
 
         entity.RevokedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
+    }
+    public async Task ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken ct = default)
+    {
+    var email = request.Email.Trim().ToLowerInvariant();
+
+    var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
+
+    // Bezpieczeństwo: nie ujawniamy, czy email istnieje w bazie.
+    // Nawet jeśli użytkownik nie istnieje, kończymy sukcesem.
+    if (user is null || !user.IsActive)
+        return;
+
+    // Unieważnij poprzednie aktywne tokeny resetu (jeśli były).
+    var oldTokens = await _db.PasswordResetTokens
+        .Where(t => t.UserId == user.Id && t.UsedAt == null)
+        .ToListAsync(ct);
+    foreach (var old in oldTokens)
+        old.UsedAt = DateTime.UtcNow;
+
+    var minutes = int.TryParse(_config["App:PasswordResetTokenMinutes"], out var m) ? m : 30;
+    var plainToken = GenerateRandomToken();
+    var resetToken = new PasswordResetToken
+    {
+        UserId = user.Id,
+        TokenHash = HashToken(plainToken),
+        ExpiresAt = DateTime.UtcNow.AddMinutes(minutes)
+    };
+
+    _db.PasswordResetTokens.Add(resetToken);
+    await _db.SaveChangesAsync(ct);
+
+    var frontendUrl = _config["App:FrontendUrl"] ?? "http://localhost:5173";
+    var resetLink = $"{frontendUrl.TrimEnd('/')}/reset-password?token={Uri.EscapeDataString(plainToken)}";
+
+    var html = EmailTemplates.PasswordReset(resetLink, minutes);
+    await _email.SendAsync(user.Email, "Reset hasła — Rezerwacje JST", html, ct);
+    }
+
+    public async Task ResetPasswordAsync(ResetPasswordRequest request, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.Token))
+            throw new InvalidOperationException("Token jest wymagany.");
+
+        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 6)
+            throw new InvalidOperationException("Hasło musi mieć co najmniej 6 znaków.");
+
+        var hash = HashToken(request.Token);
+
+        var token = await _db.PasswordResetTokens
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.TokenHash == hash, ct)
+            ?? throw new InvalidOperationException("Nieprawidłowy token resetu hasła.");
+
+        if (token.UsedAt is not null)
+            throw new InvalidOperationException("Token został już wykorzystany.");
+
+        if (token.ExpiresAt <= DateTime.UtcNow)
+            throw new InvalidOperationException("Token wygasł. Poproś o nowy link.");
+
+        if (!token.User.IsActive)
+            throw new InvalidOperationException("Konto jest nieaktywne.");
+
+        // Ustaw nowe hasło
+        token.User.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+
+        // Oznacz token jako wykorzystany
+        token.UsedAt = DateTime.UtcNow;
+
+        // Bezpieczeństwo: unieważnij wszystkie aktywne refresh tokeny użytkownika.
+        // Jeśli ktoś przejął konto, wylogowujemy wszystkie sesje.
+        var activeRefreshTokens = await _db.RefreshTokens
+            .Where(t => t.UserId == token.UserId && t.RevokedAt == null)
+            .ToListAsync(ct);
+        foreach (var rt in activeRefreshTokens)
+            rt.RevokedAt = DateTime.UtcNow;
+
         await _db.SaveChangesAsync(ct);
     }
 
