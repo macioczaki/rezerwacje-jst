@@ -86,3 +86,16 @@ export interface AvailabilitySlot {
   date: string;
   busySlots: BusySlot[];
 }
+
+export type AuditAction = "Created" | "Updated" | "Deleted";
+
+export interface AuditLogEntry {
+  id: string;
+  userId: string | null;
+  userEmail: string | null;
+  entityType: string;
+  entityId: string;
+  action: AuditAction;
+  changes: string;
+  timestamp: string;
+}

@@ -5,8 +5,9 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { RoomsPage } from "./pages/RoomsPage";
 import { ReservationsPage } from "./pages/ReservationsPage";
-import { AdminRoomsPage } from "./pages/AdminRoomsPage";
 import { AvailabilityPage } from "./pages/AvailabilityPage";
+import { AdminRoomsPage } from "./pages/AdminRoomsPage";
+import { AuditLogPage } from "./pages/AuditLogPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -61,6 +62,14 @@ function App() {
           element={
             <AdminRoute>
               <AdminRoomsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/audit-log"
+          element={
+            <AdminRoute>
+              <AuditLogPage />
             </AdminRoute>
           }
         />

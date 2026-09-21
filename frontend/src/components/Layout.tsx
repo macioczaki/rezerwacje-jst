@@ -14,8 +14,8 @@ export function Layout() {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-  await logout();
-  navigate("/login");
+    await logout();
+    navigate("/login");
   };
 
   return (
@@ -37,9 +37,14 @@ export function Layout() {
                 Dostępność
               </NavLink>
               {isAdmin && (
-                <NavLink to="/admin/rooms" className={navLinkClass}>
-                  Panel admina
-                </NavLink>
+                <>
+                  <NavLink to="/admin/rooms" className={navLinkClass}>
+                    Panel admina
+                  </NavLink>
+                  <NavLink to="/admin/audit-log" className={navLinkClass}>
+                    Audit log
+                  </NavLink>
+                </>
               )}
             </nav>
           </div>
