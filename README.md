@@ -12,6 +12,16 @@
 >
 > ⚠️ Aplikacja działa na darmowych tierach Render i Vercel. Pierwsze żądanie po dłuższej przerwie może potrwać 30–60 sekund (Render budzi uśpiony kontener).
 
+## Galeria
+
+| Rezerwacje | Dostępność |
+|---|---|
+| ![Lista rezerwacji](docs/screenshots/reservations.png) | ![Widok dostępności](docs/screenshots/availability.png) |
+
+| Audit log |
+|---|
+| ![Audit log](docs/screenshots/audit-log.png) |
+
 Aplikacja fullstack do rezerwacji sal i urządzeń w urzędzie gminy. Projekt portfolio — **.NET 8 + React 19 + PostgreSQL**.
 
 ## Problem
