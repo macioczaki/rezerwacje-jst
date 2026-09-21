@@ -40,6 +40,7 @@ public class AuditInterceptor : SaveChangesInterceptor
         var entries = context.ChangeTracker.Entries()
             .Where(e =>
                 e.Entity is not AuditLog
+                && e.Entity is not RefreshToken
                 && (e.State == EntityState.Added
                     || e.State == EntityState.Modified
                     || e.State == EntityState.Deleted))
